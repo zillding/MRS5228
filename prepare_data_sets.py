@@ -1,8 +1,8 @@
 import os
 
-n = 3
-input_file_path = './data.csv'
-output_dir = './data/'
+n = 10
+input_file_path = './data/movie_reviews.csv'
+output_dir = './data/sets/'
 
 input_file = open(input_file_path)
 
@@ -10,7 +10,7 @@ input_file = open(input_file_path)
 output = []
 for i in range(n):
     # create the output dir if it does not exist
-    dirname = output_dir + `i+1`
+    dirname = output_dir + `i`
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 

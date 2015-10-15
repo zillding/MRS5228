@@ -1,7 +1,7 @@
 import csv
 
-input_file_path = './movies.txt'
-output_file_path = './movie_reviews.csv'
+input_file_path = './data/movies.txt'
+output_file_path = './data/movie_reviews.csv'
 
 input_file = open(input_file_path)
 cols = [
