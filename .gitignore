@@ -44,3 +44,4 @@ node_modules
 # Project specific
 *.csv
 *.txt
+data/
