@@ -4,7 +4,7 @@ n = 10
 input_file_path = './data/movie_reviews.csv'
 output_dir = './data/sets/'
 
-input_file = open(input_file_path)
+input_file = open(input_file_path, 'rb')
 
 # prepare output files
 output = []
@@ -15,8 +15,8 @@ for i in range(n):
         os.makedirs(dirname)
 
     dict = {
-        'train': open(dirname + '/train.csv', 'w'),
-        'test': open(dirname + '/test.csv', 'w')
+        'train': open(dirname + '/train.csv', 'wb'),
+        'test': open(dirname + '/test.csv', 'wb')
     };
     output.append(dict)
 
@@ -39,6 +39,9 @@ for line in input_file:
             dict['test'].write(line)
         else:
             dict['train'].write(line)
+
+    if count % 100000 == 1:
+        print 'Number of records processed:', count-1
 
 print 'Number of lines processed:', count
 
