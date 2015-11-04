@@ -46,7 +46,7 @@ for line in input_file:
             dict['train'].write(line)
 
     if count % 100000 == 1:
-        logger.debug('Number of records processed: %d' % count-1)
+        logger.debug('Number of records processed: %d' % (count-1))
 
 logger.info('Number of lines processed: %d' % count)
 
