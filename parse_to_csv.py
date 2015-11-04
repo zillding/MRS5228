@@ -1,7 +1,11 @@
 import csv
+import logger
 
 input_file_path = './data/movies.txt'
 output_file_path = './data/movie_reviews.csv'
+
+logger.info('Input file: ' + input_file_path)
+logger.info('Output file: ' + output_file_path)
 
 input_file = open(input_file_path, 'rb')
 cols = [
@@ -31,7 +35,7 @@ for line in input_file:
         doc = {}
         count += 1
         if count % 100000 == 0:
-            print 'Number of records processed:', count
+            logger.debug('Number of records processed: %d' % count)
     else:
         idx = line.find(':')
         key, value = tuple([line[:idx], line[idx+1:]])
@@ -44,7 +48,7 @@ if doc:
     write_row(doc)
     count += 1
 
-print 'Total number of records:', count
+logger.info('Total number of records: %d' % count)
 
 # close files
 input_file.close()
