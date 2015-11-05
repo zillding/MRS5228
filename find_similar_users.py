@@ -73,4 +73,5 @@ else:
 
     # make sure the similiar user list doesn't contain the original user
     # finalMatrix = finalMatrix[finalMatrix.sim != 0]
-    logger.info(findKNN(finalMatrix))
+    logger.info('Done processing')
+    logger.info('Result: ' + findKNN(finalMatrix).to_json())
