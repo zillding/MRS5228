@@ -4,8 +4,8 @@ import csv
 import sys
 import logger
 
-users = {}
-knn = 10
+k = 10
+input_file_path = './data/sets/0/test.csv'
 
 # Function definition
 
@@ -30,12 +30,9 @@ def sim(x, y):
 
 # find n most similiar vectors
 def findKNN(matrix):
-    return matrix.sort_values(['sim'], ascending=[0]).head(knn)
+    return matrix.sort_values(['sim'], ascending=[0]).head(k)
 
-file_path = './data/sets/0/test.csv'
-count = 0
-similiarUsers = {}
-user = []
+
 if len(sys.argv) == 1:
     logger.critical("User ID expected")
     quit
@@ -43,17 +40,18 @@ else:
     logger.info('User inputted: ' + str(sys.argv[1]))
     uidInput = str(sys.argv[1])
     # read in data
-    f = csv.reader(open(file_path))
+    f = csv.reader(open(input_file_path))
     dt = pd.DataFrame(columns=('pid','uid','r'))
+    count = 0
     for row in f:
         count += 1
         if count == 1:
             continue
         else:
-            dt.loc[count-1] = [row[0],row[1],row[3]]
+            dt.loc[count-1] = [row[0], row[1], row[3]]
 
     # pivot the table to be a matrix, index is uid and column is pid
-    ot = pd.pivot_table(dt,values='r', index=['uid'], columns=['pid'], aggfunc='sum').fillna(0)
+    ot = pd.pivot_table(dt, values='r', index=['uid'], columns=['pid'], aggfunc='sum').fillna(0)
     if not uidInput in ot.index:
         # if the input parameter, which is uid, doesn't exist in the system
         # meaning is a new user, user array set to normized array with value of 3
@@ -68,7 +66,7 @@ else:
     for row in ot.iterrows():
         userToCompare = []
         index, data =  row
-        if(index == uidInput):
+        if index == uidInput:
             continue
         userToCompare = map(int,data.tolist())
         finalMatrix.loc[index, 'sim'] = sim(user, userToCompare)
