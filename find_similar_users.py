@@ -13,8 +13,13 @@ logger.info('Number of nearest kneighbor: %d' % k)
 # read in data
 logger.info('Start loading data...')
 df = pd.read_csv(input_file_path)
-table = pd.pivot_table(df, values='review_score', index=['product_productid'], columns=['review_userid']).fillna(0)
+table = pd.pivot_table(df, values='review_score', index=['product_productid'], columns=['review_userid'])
 logger.info('Done loading!')
+
+# normalize data to use centered cosine similarity
+logger.info('Start normalizing data...')
+table = (table - table.mean()).fillna(0)
+logger.info('Done normalizing.')
 
 if not target_userid in table:
     logger.critical('Cannot find such user in data')
@@ -26,8 +31,11 @@ logger.info('Start finding similar users...')
 target_user_rating = table[target_userid]
 # compute similarity between two vectors
 def calc_sim(rating):
-    # compute cosine similarity between target_user_rating and rating
-    result = 1 - spatial.distance.cosine(target_user_rating, rating)
+    if (target_user_rating * rating).sum() == 0:
+        result = 0
+    else:
+        # compute cosine similarity between target_user_rating and rating
+        result = 1 - spatial.distance.cosine(target_user_rating, rating)
     return result
 
 result = table.apply(calc_sim).drop(target_userid).sort_values(ascending=False)[:k]
