@@ -20,17 +20,17 @@ if not target_userid in table:
     logger.critical('Cannot find such user in data')
     logger.info('Exit program')
     exit()
-else:
-    logger.info('Start finding similar users...')
 
-    target_user_rating = table[target_userid]
-    # compute similarity between two vectors
-    def calc_sim(rating):
-        # compute cosine similarity between target_user_rating and rating
-        result = 1 - spatial.distance.cosine(target_user_rating, rating)
-        return result
+logger.info('Start finding similar users...')
 
-    result = table.apply(calc_sim).drop(target_userid).sort_values(ascending=False)[:k]
+target_user_rating = table[target_userid]
+# compute similarity between two vectors
+def calc_sim(rating):
+    # compute cosine similarity between target_user_rating and rating
+    result = 1 - spatial.distance.cosine(target_user_rating, rating)
+    return result
 
-    logger.info('Done processing')
-    logger.info('Result: ' + result.to_json())
+result = table.apply(calc_sim).drop(target_userid).sort_values(ascending=False)[:k]
+
+logger.info('Done processing')
+logger.info('Result: ' + result.to_json())
