@@ -1,77 +1,29 @@
 import pandas as pd
-import numpy as np
-import csv
-import sys
+from scipy import spatial
 import logger
 
-k = 10
-input_file_path = './data/sets/0/test.csv'
+input_file_path = 'data/sample.csv'
+target_userid = 'A141HP4LYPWMSR'
+k = 5
 
-# Function definition
+logger.info('Input file: ' + input_file_path)
+logger.info('Target user id: ' + target_userid)
+logger.info('Number of nearest kneighbor: %d' % k)
 
-# analysis string and construct user arrays
-# normalize user arrays - normize sum to 1
-def nor(raw):
-    norm = [float(i)/sum(raw) for i in raw]
-    return norm
+# read in data
+logger.info('Start loading data...')
+df = pd.read_csv(input_file_path)
+table = pd.pivot_table(df, values='review_score', index=['product_productid'], columns=['review_userid']).fillna(0)
+logger.info('Done loading!')
 
-# convert list to vector
-def listToVector(myList):
-    myarray = np.asarray(myList)
-    return myarray;
+target_user_rating = table[target_userid]
+# compute similarity between two vectors
+def calc_sim(rating):
+    # compute cosine similarity between target_user_rating and rating
+    result = 1 - spatial.distance.cosine(target_user_rating, rating)
+    return result
 
-# find similiarity through dot product of two arrays
-def sim(x, y):
-    x = nor(x)
-    y = nor(y)
-    a = listToVector(x)
-    b = listToVector(y)
-    return np.inner(a, b)
+result = table.apply(calc_sim).drop(target_userid).sort_values(ascending=False)[:k]
 
-# find n most similiar vectors
-def findKNN(matrix):
-    return matrix.sort_values(['sim'], ascending=[0]).head(k)
-
-
-if len(sys.argv) == 1:
-    logger.critical("User ID expected")
-    quit
-else:
-    logger.info('User inputted: ' + str(sys.argv[1]))
-    uidInput = str(sys.argv[1])
-    # read in data
-    f = csv.reader(open(input_file_path))
-    dt = pd.DataFrame(columns=('pid','uid','r'))
-    count = 0
-    for row in f:
-        count += 1
-        if count == 1:
-            continue
-        else:
-            dt.loc[count-1] = [row[0], row[1], row[3]]
-
-    # pivot the table to be a matrix, index is uid and column is pid
-    ot = pd.pivot_table(dt, values='r', index=['uid'], columns=['pid'], aggfunc='sum').fillna(0)
-    if not uidInput in ot.index:
-        # if the input parameter, which is uid, doesn't exist in the system
-        # meaning is a new user, user array set to normized array with value of 3
-        logger.info('New user found: ' + uidInput)
-        ot.loc[str(sys.argv(1))] = 3
-    # user selected
-    user = ot.ix[uidInput].tolist()
-    user = map(int, user)
-
-    # for each user who is not the selected user, calculate its similiarity
-    finalMatrix = pd.DataFrame(0, index=ot.index.values, columns=['sim']);
-    for row in ot.iterrows():
-        userToCompare = []
-        index, data =  row
-        if index == uidInput:
-            continue
-        userToCompare = map(int,data.tolist())
-        finalMatrix.loc[index, 'sim'] = sim(user, userToCompare)
-
-    # make sure the similiar user list doesn't contain the original user
-    # finalMatrix = finalMatrix[finalMatrix.sim != 0]
-    logger.info('Done processing')
-    logger.info('Result: ' + findKNN(finalMatrix).to_json())
+logger.info('Done processing')
+logger.info('Result: ' + result.to_json())
