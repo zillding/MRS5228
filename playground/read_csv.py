@@ -2,13 +2,10 @@ import sys
 sys.path.insert(0, '../')
 
 import pandas as pd
-import logger
 
 input_file_path = '../data/sample.csv'
 
-logger.info('Start loading file: ' + input_file_path)
 df = pd.read_csv(input_file_path)
-logger.info('Done loading')
 
 print len(df.product_productid.unique())
 print pd.pivot_table(df, values='review_score', index=['review_userid'], columns=['product_productid'])
