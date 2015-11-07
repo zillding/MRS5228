@@ -17,30 +17,31 @@ logger.debug('======================================')
 
 # loop throught data sets
 for i in range(number_of_data_sets):
-    test_file = data_sets_dir + 'test.csv'
-    train_file = data_sets_dir + 'train.csv'
+    test_file = data_sets_dir + str(i) + '/test.csv'
+    train_file = data_sets_dir + str(i) + '/train.csv'
     # load test and train data
     logger.info('Test data file: ' + test_file)
     logger.info('Train data file: ' + train_file)
-    logger.info('Start loading data...')
 
+    logger.info('Start loading data...')
     test_df = pd.read_csv(test_file)
+    train_df = pd.read_csv(train_file)
+    logger.info('Done loading')
+
+    logger.info('Start converting to pivot table')
     test_table = pd.pivot_table(
         test_df,
         values='review_score',
         index=['review_userid'],
         columns=['product_productid']
     )
-
-    train_df = pd.train_file(train_file)
     train_table = pd.pivot_table(
         train_df,
         values='review_score',
         index=['review_userid'],
         columns=['product_productid']
     )
-
-    logger.info('Done loading')
+    logger.info('Done converting to pivot table')
 
     # normalize data to use centered cosine similarity
     logger.info('Start normalizing data...')
