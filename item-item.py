@@ -75,7 +75,7 @@ for i in range(number_of_data_sets):
         logger.debug('Number of compared products: %d' % len(productid_array))
 
         result_sim = pd.Series()
-        for productid in productid_array:
+        for index, productid in enumerate(productid_array):
             df = train_df[train_df.product_productid.isin([target_productid, productid])]
             # convert to pivot table to simplify calculation
             table = pd.pivot_table(
@@ -88,6 +88,10 @@ for i in range(number_of_data_sets):
             # calculate the similarity and store the result
             similarity = calc_sim(table[target_productid], table[productid])
             result_sim.set_value(productid, similarity)
+
+            if index % 500 == 0:
+                logger.debug('Number of products processed: %d' % index)
+
         # drop the target product
         result_sim = result_sim.drop(target_productid)
         logger.debug('Done computing similarity')
