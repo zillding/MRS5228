@@ -95,8 +95,7 @@ for i in range(number_of_data_sets):
         for userid in test_df[test_df.product_productid == target_productid].review_userid.unique():
             # find knn for this user
             rated_items = train_df[train_df.review_userid == userid].product_productid.unique()
-            knn = result_sim.get(rated_items).sort_values(ascending=False)[:k]
-            logger.debug('For user ' + userid + ', knn: ' + knn.to_string())
+            knn = result_sim.get(rated_items).sort_values(ascending=False)[:k].fillna(0)
 
             # predict the rating
             sim_weights = knn / knn.sum()
@@ -107,6 +106,7 @@ for i in range(number_of_data_sets):
 
             # compute error
             actual_rating = test_df[(test_df.product_productid == target_productid) & (test_df.review_userid == userid)].review_score.values[0]
+            logger.debug('For user %s, predict rating: %f, actual rating: %f' % (userid, predict_rating, actual_rating))
             square_errors_array.append(np.square(predict_rating - actual_rating))
 
     # compute final error result
