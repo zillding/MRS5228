@@ -8,6 +8,32 @@ number_of_data_sets = 10
 data_sets_dir = 'data/sets/'
 k = 5
 
+################################################################################
+# self defined helper functions
+################################################################################
+# compute centered cosine similarity
+# between two pandas.Series
+def calc_sim(s1, s2):
+    def get_norm(s):
+        return (s - s.mean()).fillna(0)
+
+    norm_s1 = get_norm(s1)
+    norm_s2 = get_norm(s2)
+
+    if norm_s1.dot(norm_s2) == 0:
+        result = 0
+    else:
+        result = 1 - spatial.distance.cosine(norm_s1, norm_s2)
+    return result
+
+# get one user ratings for a variaties of product in knn
+def get_user_ratings(user_df, knn):
+    s = pd.Series(data=user_df.review_score.values, index=user_df.product_productid)
+    return s.loc[knn.index]
+################################################################################
+# end of functions
+################################################################################
+
 logger.info('Start program...')
 logger.info('Number of data sets: %d' % number_of_data_sets)
 logger.info('Data sets dir: ' + data_sets_dir)
@@ -28,66 +54,62 @@ for i in range(number_of_data_sets):
     train_df = pd.read_csv(train_file)
     logger.info('Done loading')
 
-    logger.info('Start converting to pivot table')
-    test_table = pd.pivot_table(
-        test_df,
-        values='review_score',
-        index=['review_userid'],
-        columns=['product_productid']
-    )
-    train_table = pd.pivot_table(
-        train_df,
-        values='review_score',
-        index=['review_userid'],
-        columns=['product_productid']
-    )
-    logger.info('Done converting to pivot table')
+    test_productid_array = test_df.product_productid.unique()
+    logger.info('Number of products in test data: %d' % len(test_productid_array))
 
-    # normalize data to use centered cosine similarity
-    logger.info('Start normalizing data...')
-    norm_train_table = (train_table - train_table.mean()).fillna(0)
-    logger.info('Done normalizing.')
+    square_errors_array = []
+    for target_productid in test_productid_array:
+        # check whether this product id exists
+        if not target_productid in train_df.product_productid.unique():
+            logger.critical('Cannot find product in data with id: ' + target_productid)
+            continue
 
-    def guess(series):
-        productid = series.name
+        # compute similarity between this product and all others
+        logger.debug('Computing similarity for product: ' + target_productid)
 
-        if not productid in train_table:
-            logger.critical('Cannot find product with id: ' + productid)
-            return series.map(lambda x: np.nan)
+        # get products with which have common reviewers
+        # instead of looping through all other products
+        # to improve performance
+        common_reviewers = train_df[train_df.product_productid == target_productid].review_userid
+        productid_array = train_df[train_df.review_userid.isin(common_reviewers)].product_productid.unique()
+        logger.debug('Number of compared products: %d' % len(productid_array))
 
-        target_product_rating = norm_train_table[productid]
-        # compute similarity between two vectors
-        def calc_sim(rating):
-            if (target_product_rating * rating).sum() == 0:
-                result = 0
-            else:
-                # compute cosine similarity between target_user_rating and rating
-                result = 1 - spatial.distance.cosine(target_user_rating, rating)
-            return result
+        result_sim = pd.Series()
+        for productid in productid_array:
+            df = train_df[train_df.product_productid.isin([target_productid, productid])]
+            # convert to pivot table to simplify calculation
+            table = pd.pivot_table(
+                df,
+                values='review_score',
+                index=['review_userid'],
+                columns=['product_productid']
+            )
 
-        logger.debug('Compute similarity of product: ' + productid)
-        sim_series = norm_train_table.apply(calc_sim)
+            # calculate the similarity and store the result
+            similarity = calc_sim(table[target_productid], table[productid])
+            result_sim.set_value(productid, similarity)
+        # drop the target product
+        result_sim = result_sim.drop(target_productid)
+        logger.debug('Done computing similarity')
 
-        # for each user guess the rating for this product
-        result = []
-        for (userid, rating) in series.iteritems():
-            # get this user has rated items
-            products_series = train_df[train_df.review_userid == userid].product_productid
-            # get knn for this user
-            knn = sim_series.drop(productid).get(products_series).sort_values(ascending=False)[:k]
-            # compute similarity weights
+        for userid in test_df[test_df.product_productid == target_productid].review_userid.unique():
+            # find knn for this user
+            rated_items = train_df[train_df.review_userid == userid].product_productid.unique()
+            knn = result_sim.get(rated_items).sort_values(ascending=False)[:k]
+            logger.debug('For user ' + userid + ', knn: ' + knn.to_string())
+
+            # predict the rating
             sim_weights = knn / knn.sum()
-            # predict rating and add to result
-            predict_rating = sim_weights.dot(train_table.loc[userid].get(products_series))
-            result.append(predict_rating)
+            user_df = train_df[train_df.review_userid == userid]
+            user_ratings = get_user_ratings(user_df, knn)
 
-        return result;
+            predict_rating = sim_weights.dot(user_ratings)
 
-    guess_result = test_table.apply(guess)
-    logger.debug('Guess result: \n' + guess_result.to_string())
+            # compute error
+            actual_rating = test_df[(test_df.product_productid == target_productid) & (test_df.review_userid == userid)].review_score.values[0]
+            square_errors_array.append(np.square(predict_rating - actual_rating))
 
-    # evaluate algo
-    rms_error = np.sqrt(np.square(test_table - guess_result).stack().mean())
-
+    # compute final error result
+    rms_error = np.sqrt(np.mean(square_errors_array))
     logger.info('Root mean square error: %f' % rms_error)
     logger.debug('======================================')
