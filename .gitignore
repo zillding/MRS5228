@@ -44,3 +44,4 @@ node_modules
 # Project specific
 data/
 *.pyc
+.ipynb_checkpoints/
