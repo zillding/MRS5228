@@ -34,7 +34,7 @@ def get_user_ratings(user_df, knn):
 # end of functions
 ################################################################################
 
-logger.info('Start program...')
+logger.info('Start program: ' + __file__)
 logger.info('Number of data sets: %d' % number_of_data_sets)
 logger.info('Data sets dir: ' + data_sets_dir)
 logger.info('Number of nearest neighbors: %d' % k)
