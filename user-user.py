@@ -4,7 +4,7 @@ from scipy import spatial
 
 import logger
 
-number_of_data_sets = 0
+number_of_data_sets = 10
 data_sets_dir = 'data/sets/'
 k = 5
 
