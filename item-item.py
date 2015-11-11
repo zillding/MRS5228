@@ -120,7 +120,7 @@ for i in range(number_of_data_sets):
             logger.debug('For user %s, predict rating: %f, actual rating: %f' % (userid, predict_rating, actual_rating))
             square_errors_array.append(np.square(predict_rating - actual_rating))
 
-            logger.debug('So far, root mean square error: %f' % np.sqrt(np.mean(square_errors_array)))
+            logger.info('So far, root mean square error: %f' % np.sqrt(np.mean(square_errors_array)))
 
     # compute final error result
     rms_error = np.sqrt(np.mean(square_errors_array))
