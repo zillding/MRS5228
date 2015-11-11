@@ -89,17 +89,25 @@ for i in range(number_of_data_sets):
             similarity = calc_sim(table[target_userid], table[userid])
             result_sim.set_value(userid, similarity)
 
-            if index % 500 == 0:
+            if index > 0 and index % 500 == 0:
                 logger.debug('Number of users processed: %d' % index)
 
         # drop the target user
         result_sim = result_sim.drop(target_userid)
         logger.debug('Done computing similarity')
 
+        if not result_sim.any():
+            logger.critical('Cannot find similar users for target user: ' + target_userid)
+            continue
+
         for productid in test_df[test_df.review_userid == target_userid].product_productid.unique():
             # find knn for this product
             rated_users = train_df[train_df.product_productid == productid].review_userid.unique()
             knn = result_sim.get(rated_users).sort_values(ascending=False)[:k].fillna(0)
+
+            if not knn.any():
+                logger.critical('Cannot find similar users for product: ' + productid)
+                continue
 
             # predict the rating
             sim_weights = knn / knn.sum()
