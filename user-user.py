@@ -25,11 +25,6 @@ def calc_sim(s1, s2):
     else:
         result = 1 - spatial.distance.cosine(norm_s1, norm_s2)
     return result
-
-# get one user ratings for a variaties of product in knn
-def get_user_ratings(df, knn):
-    s = pd.Series(data=df.review_score.values, index=df.review_userid)
-    return s.loc[knn.index]
 ################################################################################
 # end of functions
 ################################################################################
@@ -101,6 +96,8 @@ for i in range(number_of_data_sets):
             continue
 
         for productid in test_df[test_df.review_userid == target_userid].product_productid.unique():
+            logger.debug('Guessing rating for product: ' + productid)
+
             # find knn for this product
             rated_users = train_df[train_df.product_productid == productid].review_userid.unique()
             knn = result_sim.get(rated_users).sort_values(ascending=False)[:k].fillna(0)
@@ -111,8 +108,8 @@ for i in range(number_of_data_sets):
 
             # predict the rating
             sim_weights = knn / knn.sum()
-            product_df = train_df[train_df.product_productid == productid]
-            user_ratings = get_user_ratings(product_df, knn)
+            product_df = train_df[train_df.product_productid == productid].groupby('review_userid').mean()
+            user_ratings = product_df.loc[knn.index]
 
             predict_rating = sim_weights.dot(user_ratings)
 
