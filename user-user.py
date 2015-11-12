@@ -5,7 +5,7 @@ from scipy import spatial
 import logger
 
 number_of_data_sets = 10
-data_sets_dir = 'data/sets/'
+data_sets_dir = './data/sets/'
 k = 5
 
 ################################################################################
@@ -112,6 +112,12 @@ for i in range(number_of_data_sets):
             user_ratings = product_df.loc[knn.index]
 
             predict_rating = sim_weights.dot(user_ratings)
+
+            #error control
+            if(float(predict_rating)<1):
+                predict_rating = 1 
+            if(float(predict_rating)>5):
+                predict_rating = 5
 
             # compute error
             actual_rating = test_df[(test_df.product_productid == productid) & (test_df.review_userid == target_userid)].review_score.values[0]
