@@ -109,7 +109,7 @@ for i in range(number_of_data_sets):
             # predict the rating
             sim_weights = knn / knn.sum()
             product_df = train_df[train_df.product_productid == productid].groupby('review_userid').mean()
-            user_ratings = product_df.loc[knn.index]
+            user_ratings = product_df.loc[knn.index].review_score
 
             predict_rating = sim_weights.dot(user_ratings)
 
