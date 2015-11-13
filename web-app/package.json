@@ -41,7 +41,6 @@
   "dependencies": {
     "lodash": "^3.10.1",
     "react": "^0.14.0",
-    "react-dom": "^0.14.0",
-    "react-tabs": "^0.5.1"
+    "react-dom": "^0.14.0"
   }
 }

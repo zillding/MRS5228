@@ -1,5 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import _ from 'lodash';
 
 const data = [{
@@ -90,6 +89,10 @@ export class App extends Component {
     };
   }
 
+  componentDidMount() {
+    $('.menu .item').tab();
+  }
+
   _handleSelectChange(e) {
     const k = parseInt(e.target.value);
     this.setState({ k });
@@ -115,24 +118,22 @@ export class App extends Component {
               </select>
             </div>
           </div>
-          <Tabs>
-            <TabList>
-              <Tab>user-user</Tab>
-              <Tab>item-item</Tab>
-            </TabList>
-            <TabPanel>
-              <Result
-                item={'user'}
-                data={data}
-                k={this.state.k} />
-            </TabPanel>
-            <TabPanel>
-              <Result
-                item={'movie'}
-                data={data}
-                k={this.state.k} />
-            </TabPanel>
-          </Tabs>
+          <div className="ui top attached tabular menu">
+            <a className="active item" data-tab="first">user-user</a>
+            <a className="item" data-tab="second">item-item</a>
+          </div>
+          <div className="ui bottom attached active tab segment" data-tab="first">
+            <Result
+              item={'user'}
+              data={data}
+              k={this.state.k} />
+          </div>
+          <div className="ui bottom attached tab segment" data-tab="second">
+            <Result
+              item={'movie'}
+              data={data}
+              k={this.state.k} />
+          </div>
         </div>
       </div>
     );
