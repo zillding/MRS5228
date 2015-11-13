@@ -1,19 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import _ from 'lodash';
 
-const data = [{
-  id: 'user1',
-  knn: {
-    user2: 0.34,
-    user6: 0.7
-  }
-}, {
-  id: 'user2',
-  knn: {
-    user9: 0.34,
-    user4: 0.5
-  }
-}];
+import { userData, itemData } from './data';
 
 const spanStyle = {
   marginRight: 5
@@ -22,11 +10,36 @@ const spanStyle = {
 class Table extends Component {
   render() {
     const { data, k } = this.props;
-    console.log(data);
-    console.log(k);
+    const array = _.map(data.sim, (value, key) => {
+      return {
+        id: key,
+        sim: value
+      };
+    });
+    const tableData = _.sortBy(array, 'sim').reverse().slice(0, k);
+    console.log(tableData)
 
     return (
-      <div>Table</div>
+      <div>
+        <table className="ui celled table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Centered Cosine Similarity</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              tableData.map(o =>
+                <tr key={o.id}>
+                  <td>{o.id}</td>
+                  <td>{o.sim}</td>
+                </tr>
+              )
+            }
+          </tbody>
+        </table>
+      </div>
     );
   }
 }
@@ -69,6 +82,7 @@ class Result extends Component {
             </select>
           </div>
         </div>
+        <div className="ui divider"></div>
         <Table data={tableData} k={k} />
       </div>
     );
@@ -125,13 +139,13 @@ export class App extends Component {
           <div className="ui bottom attached active tab segment" data-tab="first">
             <Result
               item={'user'}
-              data={data}
+              data={userData}
               k={this.state.k} />
           </div>
           <div className="ui bottom attached tab segment" data-tab="second">
             <Result
               item={'movie'}
-              data={data}
+              data={itemData}
               k={this.state.k} />
           </div>
         </div>
