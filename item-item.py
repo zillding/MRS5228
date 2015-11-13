@@ -1,4 +1,3 @@
-#!C:\Users\xiongtianren\Anaconda
 import pandas as pd
 import numpy as np
 from scipy import spatial
@@ -116,11 +115,10 @@ for i in range(number_of_data_sets):
 
             predict_rating = sim_weights.dot(user_ratings)
 
-            #error control
-            if(float(predict_rating)<1):
-                predict_rating = 1 
-            if(float(predict_rating)>5):
-                predict_rating = 5
+            # error control, set a boundary for error
+            if predict_rating < 1: predict_rating = 1
+            if predict_rating > 5: predict_rating = 5
+
             # compute error
             actual_rating = test_df[(test_df.product_productid == target_productid) & (test_df.review_userid == userid)].review_score.values[0]
             logger.debug('For user %s, predict rating: %f, actual rating: %f' % (userid, predict_rating, actual_rating))
