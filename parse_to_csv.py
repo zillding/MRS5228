@@ -11,8 +11,8 @@ input_file = open(input_file_path, 'rb')
 cols = [
     'product_productid',
     'review_userid',
-    'review_profilename',
-    'review_helpfulness',
+    # 'review_profilename',
+    # 'review_helpfulness',
     'review_score',
     # 'review_time',
     # 'review_summary',
