@@ -7,6 +7,10 @@ NUS CS5228 Course Project
 
 [SNAP](https://snap.stanford.edu/data/web-Movies.html)
 
+### Get the project source code
+
+`$ git clone https://github.com/ZillDing/MRS5228`
+
 ### Usage
 
 + Put the raw data file `movies.txt` in the dir `data`
@@ -29,9 +33,11 @@ NUS CS5228 Course Project
 
   `$ python generate_web_data.py`
 
-+ Start the web app
++ Install dependancies (with node installed)
 
-  `$ cd web-app`
+  `$ cd web-app && npm install`
+
++ Start the web app
 
   `$ npm start`
 
