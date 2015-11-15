@@ -6,7 +6,10 @@ import logger
 
 number_of_data_sets = 10
 data_sets_dir = 'data/sets/'
+
 k = 5
+learning_threshold = 3
+learning_rate = 0.01
 
 ################################################################################
 # self defined helper functions
@@ -15,7 +18,10 @@ k = 5
 # between two pandas.Series
 def calc_sim(s1, s2):
     def get_norm(s):
-        return (s - s.mean()).fillna(0)
+        # cannot use centered cosine similarity
+        # because it will cause following knn computation fail
+        # return (s - s.mean()).fillna(0)
+        return s.fillna(0)
 
     norm_s1 = get_norm(s1)
     norm_s2 = get_norm(s2)
@@ -25,6 +31,18 @@ def calc_sim(s1, s2):
     else:
         result = 1 - spatial.distance.cosine(norm_s1, norm_s2)
     return result
+
+# update similarities based on comparison of
+# actual score and predict score
+def perceptron_learn(result_sim, user_ratings, predict_rating, actual_rating):
+    if abs(predict_rating - actual_rating) >= learning_threshold:
+        return
+
+    common_index = result_sim.index.intersection(user_ratings.index)
+    if predict_rating > actual_rating:
+        result_sim.loc[common_index] -= learning_rate * user_ratings
+    else:
+        result_sim.loc[common_index] += learning_rate * user_ratings
 ################################################################################
 # end of functions
 ################################################################################
@@ -123,6 +141,9 @@ for i in range(number_of_data_sets):
             square_errors_array.append(np.square(predict_rating - actual_rating))
 
             logger.info('So far, root mean square error: %f' % np.sqrt(np.mean(square_errors_array)))
+
+            # machine learning: adjust result similarities if necessary
+            perceptron_learn(result_sim, user_ratings, predict_rating, actual_rating)
 
     # compute final error result
     rms_error = np.sqrt(np.mean(square_errors_array))
