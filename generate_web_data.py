@@ -16,7 +16,7 @@ max_sim_item = 10
 # between two pandas.Series
 def calc_sim(s1, s2):
     def get_norm(s):
-        return (s - s.mean()).fillna(0)
+        return s.fillna(0)
 
     norm_s1 = get_norm(s1)
     norm_s2 = get_norm(s2)
