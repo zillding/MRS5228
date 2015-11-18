@@ -23,7 +23,7 @@ NUS CS5228 Course Project
 
   `$ python prepare_data_sets.py`
 
-+ Run `item-item.py` or `user-user.py` to run the recommender and obtain error result.
++ Run `item-item.py` or `user-user.py` to run the recommender and obtain error result. The result is both displayed on the console and written to log file.
 
   `$ python item-item.py` or `$ python user-user.py`
 
