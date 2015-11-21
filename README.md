@@ -7,6 +7,8 @@ NUS CS5228 Course Project
 
 [SNAP](https://snap.stanford.edu/data/web-Movies.html)
 
+[Download](https://snap.stanford.edu/data/movies.txt.gz)
+
 ### Get the project source code
 
 `$ git clone https://github.com/ZillDing/MRS5228`
