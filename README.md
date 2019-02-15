@@ -1,6 +1,8 @@
 Movie Recommendation System
 ===========================
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/zillding/MRS5228.svg)](https://greenkeeper.io/)
+
 NUS CS5228 Course Project
 
 ### Data source:
